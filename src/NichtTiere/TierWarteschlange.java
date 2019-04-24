@@ -3,138 +3,337 @@ package NichtTiere;
 import Tiere.*;
 
 import java.util.AbstractSequentialList;
+import java.util.ConcurrentModificationException;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.function.Consumer;
 
+/**
+ * A Queue for Objects of type "Tier"
+ * @author Halvar Kelm und Gaston Magnin
+ */
 public class TierWarteschlange extends AbstractSequentialList<Tier> {
+	
+	/**
+	 * Nodes for the list this queue is based on
+	 * @author Halvar Kelm und Gaston Magnin
+	 */
 	public class Node {
-		Tier value;
-		Node next;
+		protected Tier value;
+		protected Node next;
 
+		/**
+		 * Basic constructor to create a new node with an animal
+		 * @param tier
+		 */
 		public Node(Tier tier) {
 			value = tier;
 		}
 
+		/**
+		 * Access to the part of the list behind the current node
+		 * @return the next node
+		 */
 		public Node getTail() {
 			return next;
 		}
-
+		
+		/**
+		 * Access to the value of the node
+		 * @return the value of the node
+		 */
+		public Tier getValue() {
+			return value;
+		}
+		
+		/**
+		 * The size of the list connected to the node
+		 * @return
+		 */
 		public int size() {
 			return getTail() == null ? 1 : 1 + getTail().size();
 		}
 
 	}
 
+	//pointer to the start node of the queue
 	Node head;
-
+	
+	/**
+	 * Adds an node at the end of the list
+	 * @param the Tier to add
+	 */
 	public boolean add(Tier tier) {
 		Node n = new Node(tier);
+		
 		if (isEmpty())
 			head = n;
-		else
+		else 
 			getLast().next = n;
+		
 		return true;
 	}
 
+	/**
+	 * Remove the first node from the list
+	 * @return the Tier at the first node
+	 */
 	public Tier remove() {
-		Tier h = head.value;
-		head = head.next;
+		Tier h = head.getValue();
+		head = head.getTail();
 		return h;
 	}
 
+	/**
+	 * Remove the specific node from the list
+	 * @param the node to remove
+	 */
 	public void remove(Node n) {
-		if (isEmpty())
-			return;
+		if (isEmpty()) return;
+		
 		if (head == n) {
-			head = head.next;
+			head = head.getTail();
 			return;
 		}
+		
 		Node current = head;
-		while (current.next != n && current.next != null)
-			current = current.next;
-		current.next = current.next.next;
-
+		while (current.getTail() != n && current.getTail() != null) current = current.getTail();
+		current.next = current.getTail().getTail();
 	}
 
-	public void printWarteschlange() {
+	/**
+	 * Get the last node of the list without removing it
+	 * @return the last node of the list
+	 */
+	private Node getLast() {
+		if (isEmpty()) return null;
+		
 		Node current = head;
-		while (current != null) {
-			System.out.print(current.value.getTierart() + "(" + current.value.getGeschlecht() + ") | ");
+		while (current.getTail() != null) {
 			current = current.getTail();
 		}
-		System.out.println();
-	}
-
-	private Node getLast() {
-		if (isEmpty())
-			return null;
-		Node current = head;
-		while (current.next != null) {
-			current = current.next;
-		}
 		return current;
 	}
 
+	/**
+	 * Get the node at an index
+	 * @param index
+	 * @return the node at that index
+	 */
 	public Node node(int index) {
-		if (isEmpty())
-			return null;
+		if (isEmpty()) return null;
+		
 		Node current = head;
 		for (int i = 0; i < index; i++) {
-			current = current.next;
+			current = current.getTail();
 		}
 		return current;
 	}
 
+	/**
+	 * The size of the queue
+	 * @return the size
+	 */
 	@Override
 	public int size() {
 		return head == null ? 0 : head.size();
 	}
 
+	@Override
+	public String toString() {
+		String result = "";
+		Node current = head;
+		while (current != null) {
+			result += (current.getValue().getTierart() + "(" + current.getValue().getGeschlecht() + ") | ");
+			current = current.getTail();
+		}
+		return result;
+	}
+	
+	/**
+	 * Whether the queue is empty
+	 * @return if the queue is empty
+	 */
 	public boolean isEmpty() {
 		return head == null;
 	}
 
+	/**
+	 * Release a storm on the queue - removes all Vogel-Objects
+	 * @return the number of removed Vogel-Objects
+	 */
 	public int sturm() {
-		if (isEmpty())
-			return 0;
+		//TODO: Iterator? To move over and remove the elements - probably better than handling the elements in the beginning differently
+		if (isEmpty()) return 0;
+		
 		int counter = 0;
-		while (head != null && head.value instanceof Vogel) {
-			head = head.next;
+		while (head != null && head.getValue() instanceof Vogel) {
+			head = head.getTail();
 			counter++;
 		}
-		if (isEmpty())
-			return counter;
+		
+		if (isEmpty()) return counter;
+		
 		Node current = head;
-
-		while (current.next != null) {
-			if (current.next.value instanceof Vogel) {
-				current.next = current.next.next;
+		while (current.getTail() != null) {
+			if (current.getTail().getValue() instanceof Vogel) {
+				current.next = current.getTail().getTail();
 				counter++;
 				continue;
 			}
-			current = current.next;
+			current = current.getTail();
 		}
 		return counter;
 	}
 
+	/**
+	 * Releases the Predators on the queue
+	 * Every Predator-Tier eats the Tier on it's left
+	 * if that Tier is not venomous and not a Predator itself
+	 * @return the number of eaten Tier
+	 */
 	public int grossesFressen() {
-		if (isEmpty())
-			return 0;
+		if (isEmpty()) return 0;
+		
 		Node current = head;
 		int counter = 0;
-		while (current.next != null) {
-			if (current.next.value.getRaubtier() && !current.value.getRaubtier()
-					&& (current.value instanceof Reptil ? !((Reptil) (current.value)).getGiftig() : true)) {
+		while (current.getTail() != null) {
+			if (current.getTail().getValue().getRaubtier() && !current.getValue().getRaubtier()
+					&& (current.getValue() instanceof Reptil ? !((Reptil) (current.getValue())).getGiftig() : true)) {
 				remove(current);
 				counter++;
 			}
-			current = current.next;
+			current = current.getTail();
 		}
 		return counter;
 	}
-
-	@Override
+	
 	public ListIterator<Tier> listIterator(int index) {
-		return null;
+        checkPositionIndex(index);
+        return new TierItr(index);
+
+    }
+
+
+    private void checkPositionIndex(int index) {
+		// TODO Auto-generated method stub
+		
 	}
+
+
+	private class TierItr implements ListIterator<Tier> {
+        private Node lastReturned = null;
+        private Node next;
+        private int nextIndex;
+        private int expectedModCount = modCount;
+
+        TierItr(int index) {
+            // assert isPositionIndex(index);
+            next = (index == size()) ? null : node(index);
+            nextIndex = index;
+        }
+
+        public boolean hasNext() {
+            return nextIndex < size();
+
+        }
+
+        public boolean hasPrevious() {
+            return nextIndex > 0;
+
+        }
+
+        public int nextIndex() {
+            return nextIndex;
+
+        }
+
+
+        public int previousIndex() {
+            return nextIndex - 1;
+
+        }
+
+
+        public void remove() {
+            checkForComodification();
+            if (lastReturned == null)
+                throw new IllegalStateException();
+
+            Node lastNext = lastReturned.next;
+            TierWarteschlange.this.remove(lastReturned);
+            if (next == lastReturned)
+                next = lastNext;
+            else
+                nextIndex--;
+            lastReturned = null;
+            expectedModCount++;
+
+        }
+
+        public void forEachRemaining(Consumer<? super Tier> action) {
+            Objects.requireNonNull(action);
+            while (modCount == expectedModCount && nextIndex < size()) {
+                action.accept(next.value);
+                lastReturned = next;
+                next = next.next;
+                nextIndex++;
+            }
+            checkForComodification();
+        }
+
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+        }
+
+
+        public Tier next() {
+            checkForComodification();
+            if (!hasNext())
+                throw new NoSuchElementException();
+            lastReturned = next;
+            next = next.next;
+            nextIndex++;
+            return lastReturned.value;
+
+        }
+
+        @Deprecated //not needed
+        public Tier previous() {
+            checkForComodification();
+            if (!hasPrevious())
+                throw new NoSuchElementException();
+
+           // lastReturned = next = (next == null) ? last : next.prev;
+            nextIndex--;
+            return lastReturned.value;
+        }
+
+
+        public void set(Tier e) {
+            if (lastReturned == null)
+                throw new IllegalStateException();
+
+            checkForComodification();
+            lastReturned.value = e;
+        }
+
+        @Deprecated //not needed
+        public void add(Tier e) {
+            checkForComodification();
+            lastReturned = null;
+            if (next == null) {
+              //  linkLast(e);
+            }else {
+              //  linkBefore(e, next);
+            }
+            nextIndex++;
+            expectedModCount++;
+
+        }
+
+    }
 
 }
