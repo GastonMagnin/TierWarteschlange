@@ -58,7 +58,7 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	}
 
 	//pointer to the start node of the queue
-	Node head = null;
+	Node head;
 	
 	/**
 	 * Adds an node at the end of the list
@@ -133,14 +133,6 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 			current = current.getTail();
 		}
 		return current;
-	}
-
-	/**
-	 * Clears the queue
-	 */
-	@Override
-	public void clear() {
-		head = null;
 	}
 	
 	/**
