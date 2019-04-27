@@ -11,13 +11,13 @@ import java.util.function.Consumer;
 
 /**
  * A Queue for Objects of type "Tier"
- * @author Halvar Kelm und Gaston Magnin
+ * @author Halvar Kelm and Gaston Magnin
  */
 public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	
 	/**
 	 * Nodes for the list this queue is based on
-	 * @author Halvar Kelm und Gaston Magnin
+	 * @author Halvar Kelm and Gaston Magnin
 	 */
 	public class Node {
 		protected Tier value;
@@ -66,12 +66,10 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	 */
 	public boolean add(Tier tier) {
 		Node n = new Node(tier);
-		
 		if (isEmpty())
 			head = n;
 		else 
 			getLast().next = n;
-		
 		return true;
 	}
 
@@ -80,6 +78,7 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	 * @return the Tier at the first node
 	 */
 	public Tier remove() {
+		if(isEmpty()) return null;
 		Tier h = head.getValue();
 		head = head.getTail();
 		return h;
@@ -88,18 +87,19 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	/**
 	 * Remove the specific node from the list
 	 * @param the node to remove
+	 * @return 
 	 */
-	public void remove(Node n) {
-		if (isEmpty()) return;
-		
+	public Tier remove(Node n) {
+		if (isEmpty()) return null;
 		if (head == n) {
 			head = head.getTail();
-			return;
+			return null;
 		}
-		
 		Node current = head;
 		while (current.getTail() != n && current.getTail() != null) current = current.getTail();
+		Tier t = current.getTail().getValue();
 		current.next = current.getTail().getTail();
+		return t;
 	}
 
 	/**
@@ -140,6 +140,9 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 		return head == null ? 0 : head.size();
 	}
 
+	/**
+	 * prints the queue
+	 */
 	@Override
 	public String toString() {
 		String result = "";
@@ -149,6 +152,14 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 			current = current.getTail();
 		}
 		return result;
+	}
+	
+	/**
+	 * prints the queue as well 
+	 */
+	@Deprecated
+	public String printWarteschlange() {
+		return toString();
 	}
 	
 	/**
@@ -164,25 +175,14 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	 * @return the number of removed Vogel-Objects
 	 */
 	public int sturm() {
-		//TODO: Iterator? To move over and remove the elements - probably better than handling the elements in the beginning differently
-		if (isEmpty()) return 0;
-		
+		TierItr tItr = new TierItr(0);
 		int counter = 0;
-		while (head != null && head.getValue() instanceof Vogel) {
-			head = head.getTail();
-			counter++;
-		}
-		
-		if (isEmpty()) return counter;
-		
-		Node current = head;
-		while (current.getTail() != null) {
-			if (current.getTail().getValue() instanceof Vogel) {
-				current.next = current.getTail().getTail();
+		while(tItr.hasNext()) {
+			Tier t = tItr.next();
+			if(t instanceof Vogel) {
 				counter++;
-				continue;
+				tItr.remove();
 			}
-			current = current.getTail();
 		}
 		return counter;
 	}
@@ -210,18 +210,14 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	}
 	
 	public ListIterator<Tier> listIterator(int index) {
-        checkPositionIndex(index);
         return new TierItr(index);
 
     }
 
-
-    private void checkPositionIndex(int index) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
+    /**
+     * An Iterator to traverse the TierWarteschlange
+     * @author Halvar Kelm and Gaston Magnin
+     */
 	private class TierItr implements ListIterator<Tier> {
         private Node lastReturned = null;
         private Node next;
@@ -236,23 +232,19 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 
         public boolean hasNext() {
             return nextIndex < size();
-
         }
 
         public boolean hasPrevious() {
             return nextIndex > 0;
-
         }
 
         public int nextIndex() {
             return nextIndex;
-
         }
 
 
         public int previousIndex() {
             return nextIndex - 1;
-
         }
 
 
@@ -260,16 +252,15 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
             checkForComodification();
             if (lastReturned == null)
                 throw new IllegalStateException();
-
             Node lastNext = lastReturned.next;
             TierWarteschlange.this.remove(lastReturned);
+            modCount++;
             if (next == lastReturned)
                 next = lastNext;
             else
                 nextIndex--;
             lastReturned = null;
             expectedModCount++;
-
         }
 
         public void forEachRemaining(Consumer<? super Tier> action) {
@@ -297,31 +288,28 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
             next = next.next;
             nextIndex++;
             return lastReturned.value;
-
         }
 
-        @Deprecated //not needed
-        public Tier previous() {
+        @Deprecated //we don't do that here
+        public Tier previous() {/*
             checkForComodification();
             if (!hasPrevious())
                 throw new NoSuchElementException();
-
-           // lastReturned = next = (next == null) ? last : next.prev;
-            nextIndex--;
+            lastReturned = next = (next == null) ? last : next.prev;
+            nextIndex--;*/
             return lastReturned.value;
         }
-
 
         public void set(Tier e) {
             if (lastReturned == null)
                 throw new IllegalStateException();
-
             checkForComodification();
             lastReturned.value = e;
         }
 
-        @Deprecated //not needed
+        @Deprecated //we don't do that here
         public void add(Tier e) {
+        	/*
             checkForComodification();
             lastReturned = null;
             if (next == null) {
@@ -331,7 +319,7 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
             }
             nextIndex++;
             expectedModCount++;
-
+        	*/
         }
 
     }
