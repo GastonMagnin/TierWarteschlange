@@ -2,8 +2,8 @@ package Tiere;
 
 import java.util.Random;
 
-@SuppressWarnings("WeakerAccess")
-public class Tier {
+@SuppressWarnings("rawtypes")
+public class Tier implements Comparable{
 
 	private static final char MALE = 'M';
 	private static final char FEMALE = 'W';
@@ -69,10 +69,28 @@ public class Tier {
 		this.geschlecht = geschlecht;
 	}
 	
-	
 	@Override
 	public String toString() {
 		return getTierart() + " | Geschlecht: " + getGeschlecht() + " | Alter: " + getAlter() + " | Gewicht: " + getGewicht() + "| Raubtier: " + getRaubtier();
+	}
+
+
+	//compares two Tier objects
+	@Override
+	public int compareTo(Object o) {
+		if(this.getTierart() == ((Tier)o).getTierart() && this.getGeschlecht() == ((Tier)o).getGeschlecht()) {
+			return 0;
+		}else if(this.getTierart() == ((Tier)o).getTierart() && this.getGeschlecht() == 'M' && ((Tier)o).getGeschlecht() == 'W') {
+			return 1;
+		}else if(this.getTierart() == ((Tier)o).getTierart() && this.getGeschlecht() == 'W' && ((Tier)o).getGeschlecht() == 'M') {
+			return -1;
+		}else if(this.getTierart() != ((Tier)o).getTierart()) {
+			int comp = this.getTierart().compareTo(((Tier)o).getTierart());
+			if(comp == 0) return 1;
+			else return comp;
+		}else {
+			throw new IllegalArgumentException();
+		}
 	}
 
 }
