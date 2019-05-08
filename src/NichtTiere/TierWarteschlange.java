@@ -62,6 +62,7 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	
 	/**
 	 * Adds an node at the end of the list
+	 * and sorts the list
 	 * @param the Tier to add
 	 */
 	public boolean add(Tier tier) {
@@ -70,10 +71,6 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 			head = n;
 		else
 			getLast().next = n;
-		if(head != null && head.getTail() != null)
-			try{
-				sort((Tier first, Tier second) -> first.getTierart().compareTo(second.getTierart()));
-			}catch(NoSuchElementException e) {}
 		return true;
 	}
 
