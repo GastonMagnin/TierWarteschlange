@@ -7,7 +7,7 @@ import java.util.TreeSet;
 import Tiere.Tier;
 
 @SuppressWarnings("serial")
-public class Stall<T> extends TreeSet<T> {
+public class Stall<T extends Tier> extends TreeSet<T> {
 	
 	@Override
 	public boolean add(T e) {
@@ -23,8 +23,8 @@ public class Stall<T> extends TreeSet<T> {
 	public void raubtiertrennung(Collection<?> c, boolean raubtier) {
 		Iterator<T> itr = this.iterator();
 		while(itr.hasNext()) {
-	         Object element = itr.next();
-	         if(element instanceof Tier && ((Tier) element).getRaubtier() == raubtier) ((Collection<T>)c).add((T) element);
+	         Tier element = itr.next();
+	         if(element instanceof Tier && element.getRaubtier() == raubtier) ((Collection<T>)c).add((T) element);
 		}
 	}
 	
@@ -36,9 +36,9 @@ public class Stall<T> extends TreeSet<T> {
 		String result = "";
 		Iterator<T> itr = this.iterator();
 		while(itr.hasNext()) {
-	         Object element = itr.next();
+	         Tier element = itr.next();
 	         if(element instanceof Tier)
-	        	 result += (((Tier) element).getTierart() + "(" + ((Tier) element).getGeschlecht() + ") | ");
+	        	 result += (element.getTierart() + "(" + element.getGeschlecht() + ") | ");
 	         else
 	        	 result += element.toString()+" | ";
 		}
