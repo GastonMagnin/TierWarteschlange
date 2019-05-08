@@ -62,7 +62,6 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 	
 	/**
 	 * Adds an node at the end of the list
-	 * and sorts the list
 	 * @param the Tier to add
 	 */
 	public boolean add(Tier tier) {
