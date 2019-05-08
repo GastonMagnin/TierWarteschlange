@@ -70,10 +70,6 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 			head = n;
 		else
 			getLast().next = n;
-		if(head != null && head.getTail() != null)
-			try{
-				sort((Tier first, Tier second) -> first.getTierart().compareTo(second.getTierart()));
-			}catch(NoSuchElementException e) {}
 		return true;
 	}
 
