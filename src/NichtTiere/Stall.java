@@ -36,10 +36,7 @@ public class Stall<T extends Tier> extends TreeSet<T> {
 		Iterator<T> itr = this.iterator();
 		while(itr.hasNext()) {
 	         Tier element = itr.next();
-	         if(element instanceof Tier)
 	        	 result += (element.getTierart() + "(" + element.getGeschlecht() + ") | ");
-	         else
-	        	 result += element.toString()+" | ";
 		}
 		return result;
 	}
