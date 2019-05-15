@@ -19,12 +19,11 @@ public class Stall<T extends Tier> extends TreeSet<T> {
 	 * @param collection
 	 * @param raubtier
 	 */
-	@SuppressWarnings("unchecked")
-	public void raubtiertrennung(Collection<?> c, boolean raubtier) {
+	public void raubtiertrennung(Collection<T> c, boolean raubtier) {
 		Iterator<T> itr = this.iterator();
 		while(itr.hasNext()) {
-	         Tier element = itr.next();
-	         if(element instanceof Tier && element.getRaubtier() == raubtier) ((Collection<T>)c).add((T) element);
+	         T element = itr.next();
+	         if(element.getRaubtier() == raubtier) c.add(element);
 		}
 	}
 	

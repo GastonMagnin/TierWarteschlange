@@ -209,6 +209,12 @@ public class TierWarteschlange extends AbstractSequentialList<Tier> {
 		return counter;
 	}
 	
+	/**
+	 * An Iterator to traverse the TierWarteschange
+	 * 
+	 * @param where to start
+	 * @return the iterator
+	 */
 	public ListIterator<Tier> listIterator(int index) {
         return new TierItr(index);
 
